@@ -405,9 +405,11 @@ module ETL #:nodoc:
                 Engine.current_destination = destination
                 rows.each do |row|
                   destination.write(row)
+                  
                   if(source.last_completed_id_table)
                     Engine.last_completed_id = row[:id]
                   end
+                  
                   Engine.rows_written += 1 if index == 0
                 end
               end
