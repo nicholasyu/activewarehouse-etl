@@ -182,9 +182,10 @@ module ETL #:nodoc:
             conditions << "#{new_records_only} > #{connection.quote(last_completed.to_s(:db))}"
           end
         elsif last_completed_id_table
-          last_completed = ETL::Execution::Job.maximum('created_at', :conditions => ['control_file = ? and completed_at is not null', control.file])
+          puts "LAST COMPLETED ID TABLE YAY"
+          last_completed = ETL::Execution::Job.maximum('last_completed_id', :conditions => ['control_file = ? and completed_at is not null', control.file])
           if(last_completed)
-            conditions << "#{last_completed_id_table}.id > last_completed"
+            conditions << "#{last_completed_id_table}.id > #{last_completed}"
           end
         end
         
