@@ -115,6 +115,7 @@ module ETL #:nodoc:
           if store_locally
             file = local_file
             write_local(file)
+            @query_rows = nil # free the memory
             read_rows(file, &block)
           else
             query_rows.each do |row|
@@ -182,7 +183,6 @@ module ETL #:nodoc:
             conditions << "#{new_records_only} > #{connection.quote(last_completed.to_s(:db))}"
           end
         elsif last_completed_id_table
-          puts "LAST COMPLETED ID TABLE YAY"
           last_completed = ETL::Execution::Job.maximum('last_completed_id', :conditions => ['control_file = ? and completed_at is not null', control.file])
           if(last_completed)
             conditions << "#{last_completed_id_table}.id > #{last_completed}"
