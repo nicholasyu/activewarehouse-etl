@@ -102,6 +102,10 @@ module ETL #:nodoc:
         Engine.read_locally
       end
       
+      # Need this for sources that don't support last completed id
+      def last_completed_id_table
+        false
+      end      
     end
   end
 end
