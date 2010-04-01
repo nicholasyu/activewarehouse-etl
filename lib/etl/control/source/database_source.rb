@@ -59,6 +59,11 @@ module ETL #:nodoc:
         configuration[:join]
       end
       
+      # Table to use with the last_completed_id from etl_execution table
+      def last_completed_id_table
+        configuration[:last_completed_id_table]
+      end
+      
       # Get the select part of the query, defaults to '*'
       def select
         configuration[:select] || '*'
@@ -175,6 +180,11 @@ module ETL #:nodoc:
           )
           if last_completed
             conditions << "#{new_records_only} > #{connection.quote(last_completed.to_s(:db))}"
+          end
+        elsif last_completed_id_table
+          last_completed = ETL::Execution::Job.maximum('created_at', :conditions => ['control_file = ? and completed_at is not null', control.file])
+          if(last_completed)
+            conditions << "#{last_completed_id_table}.id > last_completed"
           end
         end
         
