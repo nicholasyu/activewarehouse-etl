@@ -340,11 +340,9 @@ module ETL #:nodoc:
                 processed_rows = []
                 rows.each do |row|
                   #Was playing nils in the rows array
-                  if(temp_rows = processor.process(row))
-                    processed_rows << temp_rows.flatten
-                  end
+                  processed_rows << processor.process(row)
                 end
-                rows = processed_rows
+                rows = processed_rows.flatten.compact
               end
             rescue => e
               msg = "Error processing rows after read from #{Engine.current_source} on line #{Engine.current_source_row}: #{e}"
@@ -388,7 +386,9 @@ module ETL #:nodoc:
               Engine.logger.debug "Processing before write"
               control.before_write_processors.each do |processor|
                 processed_rows = []
-                rows.each { |row| processed_rows << processor.process(row) }
+                rows.each do |row| 
+                  processed_rows << process.process(row)
+                end
                 rows = processed_rows.flatten.compact
               end
             rescue => e
