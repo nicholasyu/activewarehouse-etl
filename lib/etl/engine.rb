@@ -339,9 +339,12 @@ module ETL #:nodoc:
               control.after_read_processors.each do |processor|
                 processed_rows = []
                 rows.each do |row|
-                  processed_rows << processor.process(row)
+                  #Was playing nils in the rows array
+                  if(temp_rows = processor.process(row))
+                    processed_rows << temp_rows.flatten
+                  end
                 end
-                rows = processed_rows.flatten
+                rows = processed_rows
               end
             rescue => e
               msg = "Error processing rows after read from #{Engine.current_source} on line #{Engine.current_source_row}: #{e}"
