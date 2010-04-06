@@ -387,7 +387,7 @@ module ETL #:nodoc:
               control.before_write_processors.each do |processor|
                 processed_rows = []
                 rows.each do |row| 
-                  processed_rows << process.process(row)
+                  processed_rows << processor.process(row)
                 end
                 rows = processed_rows.flatten.compact
               end
