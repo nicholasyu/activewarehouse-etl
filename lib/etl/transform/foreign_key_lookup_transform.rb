@@ -1,5 +1,3 @@
-require 'pp'
-
 module ETL #:nodoc:
   module Transform #:nodoc:
     # Transform which looks up the value and replaces it with a foriegn key reference
@@ -43,7 +41,6 @@ module ETL #:nodoc:
           if(resolver.is_a?(SQLResolver) && resolver.get_field.kind_of?(Array))
             value = resolver.get_field.collect {|f| row[f.to_sym]}
           end
-          puts "transform value is #{value.pretty_inspect}"
           fk = resolver.resolve(value)
           fk ||= @default
           raise ResolverError, "Unable to resolve #{value} to foreign key for #{name} in row #{ETL::Engine.rows_read}. You may want to specify a :default value." unless fk
@@ -107,7 +104,6 @@ class SQLResolver
     @connection ||= ActiveRecord::Base.connection
   end
   def resolve(value)
-    puts "Transformer resolving the value #{value.pretty_inspect}"
     if @use_cache
       cache[cache_key(value)]
     else
