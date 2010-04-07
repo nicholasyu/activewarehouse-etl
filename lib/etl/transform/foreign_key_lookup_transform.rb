@@ -1,3 +1,5 @@
+require 'pp'
+
 module ETL #:nodoc:
   module Transform #:nodoc:
     # Transform which looks up the value and replaces it with a foriegn key reference
@@ -38,6 +40,10 @@ module ETL #:nodoc:
         unless fk
           raise ResolverError, "Foreign key for #{value} not found and no resolver specified" unless resolver
           raise ResolverError, "Resolver does not appear to respond to resolve method" unless resolver.respond_to?(:resolve)
+          if(resolver.is_a?(SQLResolver) && resolver.get_field.kind_of?(Array))
+            value = resolver.get_field.collect {|f| row[f.to_sym]}
+          end
+          puts "transform value is #{value.pretty_inspect}"
           fk = resolver.resolve(value)
           fk ||= @default
           raise ResolverError, "Unable to resolve #{value} to foreign key for #{name} in row #{ETL::Engine.rows_read}. You may want to specify a :default value." unless fk
@@ -79,6 +85,13 @@ class ActiveRecordResolver
 end
 
 class SQLResolver
+  # Need to make fields publicly accesible
+  attr_accessor :field
+
+  def get_field
+    @field
+  end
+
   # Initialize the SQL resolver. Use the given table and field name to search
   # for the appropriate foreign key. The field should be the name of a natural
   # key that is used to locate the surrogate key for the record.
@@ -86,7 +99,7 @@ class SQLResolver
   # The connection argument is optional. If specified it can be either a symbol
   # referencing a connection defined in the ETL database.yml file or an actual
   # ActiveRecord connection instance. If the connection is not specified then
-  # the ActiveRecord::Base.connection will be used.
+  # the ActiveRecord::Base.connection will be used
   def initialize(table, field, connection=nil)
     @table = table
     @field = field
@@ -94,6 +107,7 @@ class SQLResolver
     @connection ||= ActiveRecord::Base.connection
   end
   def resolve(value)
+    puts "Transformer resolving the value #{value.pretty_inspect}"
     if @use_cache
       cache[cache_key(value)]
     else
@@ -128,7 +142,7 @@ class SQLResolver
   end
 
   def wheres(value)
-    value  = [ value ]  unless value.kind_of?(Array)
+    value = [ value ]  unless value.kind_of?(Array)
     field.zip(value).collect { |a|
       "#{a[0]} = #{@connection.quote(a[1])}"
     }.join(' AND ')
