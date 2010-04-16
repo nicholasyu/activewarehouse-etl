@@ -491,6 +491,8 @@ module ETL #:nodoc:
       ETL::Engine.job.status = (errors.length > 0 ? 'completed with errors' : 'completed')
       ETL::Engine.job.last_completed_id = (Engine.last_completed_id ? Engine.last_completed_id : nil)
       ETL::Engine.job.save!
+      #reset last completed id
+      Engine.last_completed_id = nil
     end
     
     private
