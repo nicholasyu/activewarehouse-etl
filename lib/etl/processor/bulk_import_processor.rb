@@ -23,6 +23,8 @@ module ETL #:nodoc:
       attr_accessor :line_separator
       # The string that indicates a NULL (defaults to an empty string)
       attr_accessor :null_string
+      attr_accessor :replace
+      attr_accessor :ignore
        
       # Initialize the processor.
       #
@@ -49,7 +51,8 @@ module ETL #:nodoc:
         @line_separator = (configuration[:line_separator] || "\n")
         @null_string = (configuration[:null_string] || "")
         @field_enclosure = configuration[:field_enclosure]
-        
+        @ignore = configuration[:ignore]
+        @replace = configuration[:replace]        
         raise ControlError, "Target must be specified" unless @target
         raise ControlError, "Table must be specified" unless @table
       end
@@ -70,6 +73,8 @@ module ETL #:nodoc:
             options[:fields][:delimited_by] = field_separator if field_separator
             options[:fields][:enclosed_by] = field_enclosure if field_enclosure
             options[:fields][:terminated_by] = line_separator if line_separator
+            options[:replace] = true if replace
+            options[:ignore] = true if ignore
           end
           conn.bulk_load(file, table_name, options)
         end
